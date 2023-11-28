@@ -29,6 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *---------------------------------------------------------------------------*)
 
+
 open Lwt.Infix
 
 module Io :
@@ -95,6 +96,13 @@ module Server = struct
         Ssl_io.make_server ?alpn_protocols ~certfile ~keyfile
       in
       fun _client_addr socket -> make_ssl_server socket
+
+    let create_default_with_context ?alpn_protocols ~server_ctx =
+      let make_ssl_server =
+        Ssl_io.make_server_with_context ?alpn_protocols ~server_ctx
+      in
+      fun _client_addr socket -> make_ssl_server socket
+
   end
 end
 
@@ -113,5 +121,9 @@ module Client = struct
 
     let create_default ?alpn_protocols socket =
       Ssl_io.make_default_client ?alpn_protocols socket
+
+    let create_default_with_context ?alpn_protocols socket ssl_context =
+      Ssl_io.make_default_client_with_context ?alpn_protocols socket ssl_context
+
   end
 end

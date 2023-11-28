@@ -64,6 +64,15 @@ module Server : sig
       -> Unix.sockaddr
       -> Lwt_unix.file_descr
       -> socket Lwt.t
+
+    val create_default_with_context
+      :  ?alpn_protocols:string list
+      -> server_ctx:Ssl.context
+      (* -> keyfile:string *)
+      -> Unix.sockaddr
+      -> Lwt_unix.file_descr
+      -> socket Lwt.t
+
   end
 end
 
@@ -87,5 +96,12 @@ module Client : sig
        ?alpn_protocols:string list
       -> Lwt_unix.file_descr
       -> socket Lwt.t
+
+    val create_default_with_context
+      :  ?alpn_protocols:string list
+      -> Lwt_unix.file_descr
+      -> Ssl.context
+      -> socket Lwt.t
+
   end
 end

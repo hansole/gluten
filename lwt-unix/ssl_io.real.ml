@@ -118,3 +118,31 @@ let make_server ?alpn_protocols ~certfile ~keyfile socket =
       first_match client_protos protos)
   | None -> ());
   Lwt_ssl.ssl_accept socket server_ctx
+
+(* 
+   FIXME: A hack to use Ssl.context sat from outside in the lib
+ *)
+let make_server_with_context ?alpn_protocols ~server_ctx socket =
+  (* let server_ctx = Ssl.create_context Ssl.SSLv23 Ssl.Server_context in
+   * Ssl.disable_protocols server_ctx [ Ssl.SSLv23 ];
+   * Ssl.use_certificate server_ctx certfile keyfile; *)
+  (match alpn_protocols with
+  | Some protos ->
+    Ssl.set_context_alpn_protos server_ctx protos;
+    Ssl.set_context_alpn_select_callback
+      server_ctx
+      (fun client_protos -> first_match client_protos protos);
+  | None ->
+    ());
+  Lwt_ssl.ssl_accept socket server_ctx
+
+let make_default_client_with_context ?alpn_protocols socket client_ctx =
+  (* let client_ctx = Ssl.create_context Ssl.SSLv23 Ssl.Client_context in
+   * Ssl.disable_protocols client_ctx [ Ssl.SSLv23 ];
+   * Ssl.honor_cipher_order client_ctx; *)
+  (match alpn_protocols with
+  | Some protos ->
+    Ssl.set_context_alpn_protos client_ctx protos
+  | None ->
+    ());
+  Lwt_ssl.ssl_connect socket client_ctx
